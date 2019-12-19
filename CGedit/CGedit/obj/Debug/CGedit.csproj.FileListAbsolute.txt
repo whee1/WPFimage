@@ -1,0 +1,17 @@
+D:\c++\wpfapp\CGedit\CGedit\bin\Debug\CGedit.exe.config
+D:\c++\wpfapp\CGedit\CGedit\bin\Debug\CGedit.exe
+D:\c++\wpfapp\CGedit\CGedit\bin\Debug\CGedit.pdb
+D:\c++\wpfapp\CGedit\CGedit\obj\Debug\MainWindow.g.cs
+D:\c++\wpfapp\CGedit\CGedit\obj\Debug\App.g.cs
+D:\c++\wpfapp\CGedit\CGedit\obj\Debug\CGedit_MarkupCompile.cache
+D:\c++\wpfapp\CGedit\CGedit\obj\Debug\CGedit_MarkupCompile.lref
+D:\c++\wpfapp\CGedit\CGedit\obj\Debug\MainWindow.baml
+D:\c++\wpfapp\CGedit\CGedit\obj\Debug\CGedit.g.resources
+D:\c++\wpfapp\CGedit\CGedit\obj\Debug\CGedit.Properties.Resources.resources
+D:\c++\wpfapp\CGedit\CGedit\obj\Debug\CGedit.csproj.GenerateResource.cache
+D:\c++\wpfapp\CGedit\CGedit\obj\Debug\CGedit.csproj.CoreCompileInputs.cache
+D:\c++\wpfapp\CGedit\CGedit\obj\Debug\CGedit.exe
+D:\c++\wpfapp\CGedit\CGedit\obj\Debug\CGedit.pdb
+D:\c++\wpfapp\CGedit\CGedit\obj\Debug\color.g.cs
+D:\c++\wpfapp\CGedit\CGedit\obj\Debug\color.baml
+D:\c++\wpfapp\CGedit\CGedit\obj\Debug\CGedit.csprojAssemblyReference.cache
