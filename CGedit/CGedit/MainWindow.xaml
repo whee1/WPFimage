@@ -26,35 +26,39 @@
         </Menu>
         <Grid Margin="0,50,0,0.4" HorizontalAlignment="Left" Width="119">
 
-            <StackPanel RenderTransformOrigin="0.434,0.544" Background="#FFFFDCDC" Margin="0,1,0,-2">
+            <StackPanel RenderTransformOrigin="0.434,0.544" Margin="0,1,0,-2">
 
 
                 <RadioButton Content="画笔" Margin="0,0,0,0" Height="20" x:Name="brush"/>
-                <Button x:Name="color" Content="" Background="#FFFF0202" Click="Color_Click" Margin="18,0,53,0" RenderTransformOrigin="0.159,0.609"/>
-                <Slider x:Name="brushSlider" Height="29" Maximum="10" Minimum="1"/>
+                <Button x:Name="color" Content="" Background="#FFFF0202" Click="Color_Click" Margin="18,0,71.2,0" RenderTransformOrigin="0.159,0.609" BorderBrush="#FFC0ACAC"/>
+                <Slider x:Name="brushSlider" Height="29" Maximum="10" Minimum="5"/>
                 <RadioButton Content="橡皮擦" Margin="0,0,0,0" Height="20" x:Name="braser"/>
-                <Slider x:Name="braserSlider" Height="42" Maximum="10" Minimum="1"/>
-                <ToolBar Height="42">
+                <Slider x:Name="braserSlider" Height="42" Maximum="10" Minimum="5"/>
+                <ToolBar Height="42" Background="{x:Null}">
 
-                    <ToggleButton x:Name="DrawRectBtn" Content="选区" Width="37" Height="20" ToolTip="选区" IsChecked="False" Checked="DrawRectBtn_Checked" Margin="0,8,0,8.8"/>
-                    <ToggleButton x:Name="DrawEllipseBtn" Content="E" Width="20" Height="20" ToolTip="画椭圆" IsChecked="False" Checked="DrawEllipseBtn_Checked"/>
-                    <ToggleButton x:Name="DrawLineBtn" Content="L" Width="20" Height="20" ToolTip="画线" IsChecked="False" Checked="DrawLineBtn_Checked"/>
+                    <ToggleButton x:Name="RectBtn" Content="□" Width="31" Height="37" ToolTip="选区" IsChecked="False" Margin="0,-1,0,0.8" Checked="ShapeBtn_Checked"/>
+                    <ToggleButton x:Name="EllipseBtn" Content="○" Width="46" Height="37" ToolTip="画椭圆" IsChecked="False"  Margin="0,0,0,-0.2" Checked="ShapeBtn_Checked"/>
+                    <ToggleButton x:Name="LineBtn" Content="—" Width="33" Height="38" ToolTip="画线" IsChecked="False"  Margin="0,0,0,-1.2" Checked="ShapeBtn_Checked"/>
                 </ToolBar>
-                <Button x:Name="ruihuaBtn" Content="锐化" Height="28" Click="RuihuaBtn_Click"/>
-                <Button x:Name="mohuBtn" Content="模糊" Height="28" Click="MohuBtn_Click"/>
+                <ToolBar Height="42" Background="{x:Null}">
+
+                    <ToggleButton x:Name="DrawRectBtn" Content="选区" Width="37" Height="20" ToolTip="选区" IsChecked="False" Checked="DrawBtn_Checked" Margin="0,8,0,8.8"/>
+                    <ToggleButton x:Name="DrawEllipseBtn" Content="E" Width="20" Height="20" ToolTip="画椭圆" IsChecked="False" Checked="DrawBtn_Checked"/>
+                    <ToggleButton x:Name="DrawLineBtn" Content="L" Width="20" Height="20" ToolTip="画线" IsChecked="False" Checked="DrawBtn_Checked"/>
+                </ToolBar>
+                <Button x:Name="ruihuaBtn" Content="锐化" Height="28" Click="RuihuaBtn_Click" Background="{x:Null}" BorderBrush="{x:Null}"/>
+                <Button x:Name="mohuBtn" Content="模糊" Height="28" Click="MohuBtn_Click" Background="{x:Null}" BorderBrush="{x:Null}"/>
             </StackPanel>
         </Grid>
         <Grid x:Name="grid1" Margin="125,48,6.6,8.4" Background="#FF909090">
-            <ScrollViewer HorizontalScrollBarVisibility="Auto">
-                <Image x:Name="image" MouseLeftButtonDown="Image_MouseLeftButtonDown" MouseMove="Image_MouseMove" MouseUp="Image_MouseUp" Stretch="None" Height="614" VerticalAlignment="Top" HorizontalAlignment="Left" Width="853" MouseWheel="Image_MouseWheel">
-                    <Image.RenderTransform>
-                        <ScaleTransform x:Name="scale"/>
-                    </Image.RenderTransform>
-                </Image>
-            </ScrollViewer>
+            <Image x:Name="image" MouseLeftButtonDown="Image_MouseLeftButtonDown" MouseMove="Image_MouseMove" MouseUp="Image_MouseUp" Stretch="None" Height="614" VerticalAlignment="Top" HorizontalAlignment="Left" Width="853" MouseWheel="Image_MouseWheel">
+                <Image.RenderTransform>
+                    <ScaleTransform x:Name="scale"/>
+                </Image.RenderTransform>
+            </Image>
             <Ellipse x:Name="ellipse1"  Visibility="Hidden" Stroke="Black" HorizontalAlignment="Left" Height="100" Margin="66,73,0,0" VerticalAlignment="Top" Width="100"/>
             <Rectangle  x:Name="rectangle1"  Visibility="Hidden" Stroke="Black" HorizontalAlignment="Left" Height="100" Margin="66,73,0,0" VerticalAlignment="Top" Width="100"/>
-            <Polyline x:Name="line" Stroke="Black" StrokeThickness="2"></Polyline>
+            <Polyline x:Name="line" Stroke="Black" StrokeThickness="2"/>
 
         </Grid>
 
