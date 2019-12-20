@@ -63,14 +63,32 @@ namespace CGedit
             circle=2,
         }
         private BrushBraserShape myBrushBraserShape = BrushBraserShape.line; //标记画笔形状
+
+        private void Drawimage(Drawing g) //在控件中显示Drawing
+        {
+            drawingGroup1.Children.Add(g);
+            //在控件中显示
+            DrawingImage drawImage = new DrawingImage(drawingGroup1);
+            image.Source = drawImage;
+        }
+        private bool PointInRect(Point p, Rect r) //判断点在不在矩形框内
+        {
+            return p.X <= r.Right && p.X >= r.Left && p.Y >= r.Top && p.Y <= r.Bottom;
+        }
+
+        private Point Offset(Point start, Point end)
+        {
+            return new Point(end.X-start.X,end.Y-start.Y); //两个值为x方向的偏移量和y方向的偏移量
+        }
         public MainWindow()
         {
             InitializeComponent();
             
             _instance = this;
-            tbtn = DrawLineBtn;
+            tbtn = DrawEllipseBtn;
             sbtn = LineBtn;
             /*ract1.Visibility = Visibility.Hidden;*/
+            Clipboard.Clear();
         }
         /// <summary>
         /// 打开保存新建
@@ -102,10 +120,9 @@ namespace CGedit
                     ImageDrawing imageDrawing = new ImageDrawing();
                     imageDrawing.Rect = new Rect(0, 0, bf.Width, bf.Height);
                     imageDrawing.ImageSource = bf;
-                    drawingGroup1.Children.Add(imageDrawing);
-                    //新建drawingimage类 传入待绘制的复合图形 然后传给组件
-                    DrawingImage drawingImage = new DrawingImage(drawingGroup1);
-                    image.Source = bf;
+                    Drawimage(imageDrawing);
+                    
+
                 }
             }
         }
@@ -170,10 +187,8 @@ namespace CGedit
             GeometryDrawing g = new GeometryDrawing();//用这个类来绘制
             g.Geometry = rect;
             g.Brush = Brushes.White;
-            drawingGroup1.Children.Add(g);
-            //新建drawingimage类 传入待绘制的复合图形 然后传给组件
-            DrawingImage drawingImage = new DrawingImage(drawingGroup1);
-            image.Source = drawingImage;
+            Drawimage(g);
+            
         }
         /// <summary>
         /// 锐化
@@ -201,10 +216,7 @@ namespace CGedit
                 imageDrawing.Rect = new Rect(0, 0, width, height);
                 imageDrawing.ImageSource = origin;
                 drawingGroup1.Children.Clear();
-                drawingGroup1.Children.Add(imageDrawing);
-                //在控件中显示
-                DrawingImage drawImage = new DrawingImage(drawingGroup1);
-                image.Source = drawImage;
+                Drawimage(imageDrawing);
             }
         }
         public BitmapImage Sharpening(BitmapImage pic,int opacity = 255)
@@ -262,6 +274,34 @@ namespace CGedit
         /// <summary>
         /// 模糊
         /// </summary>
+        private void MohuBtn_Click(object sender, RoutedEventArgs e) //模糊按钮事件
+        {
+            RenderTargetBitmap rtb = new RenderTargetBitmap((int)MyImagepixelX, (int)MyImagePixely, (int)MyImageDpiX,
+                (int)MyImagedpiY, PixelFormats.Pbgra32);
+            rtb.Render(image);
+            origin = ImageHelper.ConventToBitmapImage(rtb);
+            origin = GaussBlur(origin);//先做处理
+            if (isSelect)//如果是在选区状态下
+            {
+
+                BitmapSource fs = origin as BitmapSource;
+                CroppedBitmap cb = new CroppedBitmap(fs, new Int32Rect((int)rect[0], (int)rect[1], (int)rect[2], (int)rect[3])); //然后切割图片 拿到修改的像素区域
+                Clipboard.SetImage(cb);//复制然后粘贴
+                stickImage(new Rect(rect[0], rect[1], rect[2], rect[3]));
+                Clipboard.Clear();
+            }
+            else
+            {
+                double width = origin.Width;
+                double height = origin.Height;
+                ImageDrawing imageDrawing = new ImageDrawing();
+                imageDrawing.Rect = new Rect(0, 0, width, height);
+                imageDrawing.ImageSource = origin;
+                drawingGroup1.Children.Clear();
+                Drawimage(imageDrawing);
+            }
+
+        }
         public BitmapImage GaussBlur(BitmapImage pic, int opacity = 255)
         {
             try
@@ -317,39 +357,8 @@ namespace CGedit
                 return (BitmapImage)image.Source;
             }
         }
-        private void MohuBtn_Click(object sender, RoutedEventArgs e) //模糊按钮事件
-        {
-            RenderTargetBitmap rtb = new RenderTargetBitmap((int)MyImagepixelX, (int)MyImagePixely, (int)MyImageDpiX,
-                (int)MyImagedpiY, PixelFormats.Pbgra32);
-            rtb.Render(image);
-            origin = ImageHelper.ConventToBitmapImage(rtb);
-            origin = GaussBlur(origin);//先做处理
-            if (isSelect)//如果是在选区状态下
-            {
-               
-                BitmapSource fs = origin as BitmapSource;
-                CroppedBitmap cb = new CroppedBitmap(fs, new Int32Rect((int)rect[0], (int)rect[1], (int)rect[2], (int)rect[3])); //然后切割图片 拿到修改的像素区域
-                Clipboard.SetImage(cb);//复制然后粘贴
-                stickImage(new Rect(rect[0], rect[1], rect[2], rect[3]));
-                Clipboard.Clear();
-            }
-            else
-            {
-                double width = origin.Width;
-                double height = origin.Height;
-                ImageDrawing imageDrawing = new ImageDrawing();
-                imageDrawing.Rect = new Rect(0, 0, width, height);
-                imageDrawing.ImageSource = origin;
-                drawingGroup1.Children.Clear();
-                drawingGroup1.Children.Add(imageDrawing);
-                //在控件中显示
-                DrawingImage drawImage = new DrawingImage(drawingGroup1);
-                image.Source = drawImage;
-            }
-           
-        }
         /// <summary>
-        /// 复制粘贴
+        /// 复制粘贴 剪切 删除选区 右键菜单栏按钮功能
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -359,7 +368,7 @@ namespace CGedit
             {
                 try
                 {
-                    rectangle1.Visibility = Visibility.Hidden;//把标志选区的框隐藏
+                    //rectangle1.Visibility = Visibility.Hidden;//把标志选区的框隐藏
                     RenderTargetBitmap rtb = new RenderTargetBitmap((int)MyImagepixelX, (int)MyImagePixely, (int)MyImageDpiX, (int)MyImagedpiY, PixelFormats.Pbgra32);
                     rtb.Render(image);
                     BitmapSource bs = rtb as BitmapSource;
@@ -375,7 +384,22 @@ namespace CGedit
         }
         private void Stick_Click(object sender, RoutedEventArgs e)
         {
-            stickImage(new Rect(new Point(0,0),new Size(rect[2],rect[3])));//第一个参数是粘贴的位置
+            if (sender== rightStick) stickImage(new Rect(mousePoint.X-rect[2]/2, mousePoint.Y-rect[3]/2, rect[2], rect[3]));//第一个参数是粘贴的位置
+            else stickImage(new Rect(new Point(0, 0), new Size(rect[2], rect[3])));//第一个参数是粘贴的位置
+        }
+        private void Cut_Click(object sender, RoutedEventArgs e)
+        {
+            Copy_Click(sender,e);
+            RectangleGeometry r = new RectangleGeometry();
+            r.Rect=new Rect(rect[0],rect[1],rect[2],rect[3]);
+            GeometryDrawing g = new GeometryDrawing();
+            g.Geometry = r;
+            g.Brush = Brushes.White;
+            Drawimage(g);
+        }
+        private void CancelSelect_Click(object sender, RoutedEventArgs e)
+        {
+            rectangle1.Visibility = Visibility.Hidden;
         }
         private void stickImage(Rect r)
         {
@@ -387,15 +411,15 @@ namespace CGedit
                 rectangle1.Visibility = Visibility.Visible;
                 rectangle1.Width = rect[2];
                 rectangle1.Height = rect[3];
-                rectangle1.Margin = new Thickness(visualx, visualy, 0, 0);
-
+                rectangle1.Margin = new Thickness(r.X, r.Y, 0, 0);
+                rect[0] = r.X;
+                rect[1] = r.Y;
                 BitmapSource bs = Clipboard.GetImage();
                 ImageDrawing imageDrawing = new ImageDrawing();
                 imageDrawing.Rect = r;
                 imageDrawing.ImageSource = bs;
-                drawingGroup1.Children.Add(imageDrawing);
-                DrawingImage d = new DrawingImage(drawingGroup1);
-                image.Source = d;
+                Drawimage(imageDrawing);
+              
                 isSelect = true; //粘贴之后默认进入选区模式
 
                 //rect = new double[4];//清空选区矩形框
@@ -403,16 +427,15 @@ namespace CGedit
         }
         private void Image_MouseWheel(object sender, MouseWheelEventArgs e)
         {
-            /*if (e.Delta<0&&scale.ScaleX<0.3&&scale.ScaleY<0.3)
-            {
-                return;
-            }
-            if (e.Delta > 0 && scale.ScaleX >1 && scale.ScaleY > 1)
-            {
-                return;
-            }
-            scale.ScaleX += (double)e.Delta / 1000;
-            scale.ScaleY += (double)e.Delta / 1000;*/
+         }
+        private void DeleteSelect_Clic(object sender, RoutedEventArgs e)
+        {
+            RectangleGeometry r = new RectangleGeometry();
+            r.Rect = new Rect(rect[0], rect[1], rect[2], rect[3]);
+            GeometryDrawing g = new GeometryDrawing();
+            g.Geometry = r;
+            g.Brush = Brushes.White;
+            Drawimage(g);
         }
         /// <summary>
         /// 工具栏按键事件
@@ -423,11 +446,6 @@ namespace CGedit
         {
             tbtn.IsChecked = false;
             tbtn = (ToggleButton)sender;
-            brush.IsChecked = false;
-            braser.IsChecked = false;
-            rectangle1.Visibility = Visibility.Hidden;
-           
-
         }
         /// <summary>
         /// 调色板
@@ -472,17 +490,13 @@ namespace CGedit
             }
             if (tbtn == DrawEllipseBtn && tbtn.IsChecked == true) //画椭圆
             {
+                rectangle1.Visibility = Visibility.Hidden;
                 ellipse1.Visibility = Visibility.Visible;
                 ellipse1.Width = 1;
                 ellipse1.Height = 1;
                 ellipse1.Margin = new Thickness(visualx, visualy, 0, 0);
                 
             }
-            if (tbtn == DrawLineBtn && tbtn.IsChecked == true)  //如果是画线
-            {   x = position.X;
-                y = position.Y;
-             }
-
             if (brush.IsChecked == true||braser.IsChecked==true)   //画笔或橡皮擦
             {
                 line.Visibility = Visibility.Visible;
@@ -495,7 +509,23 @@ namespace CGedit
                 line.StrokeThickness = (bool)brush.IsChecked?brushSlider.Value:braserSlider.Value;
                
             }
-            mark = true;
+            //移动选区：在选区状态下 如果选中了移动按钮 按下鼠标左键时记录坐标 同时调用剪切功能 抬起时记录坐标 算出偏移 然后对rect进行偏移 在mouseup函数中 松开的时候在rect区域内粘贴  拖动过程中只对rectangle组件进行视觉上的移动操作
+            if (isSelect&&SelectMoveBtn.IsChecked==true)
+            {
+                tbtn.IsChecked = false; //把所有按钮选中状态改为未选中
+                brush.IsChecked = false;
+                braser.IsChecked = false;
+                if (PointInRect(position,new Rect(rect[0],rect[1],rect[2],rect[3]))) //按下的时候必须要在选区范围内
+                {
+                    Cut_Click(sender, e);//调用剪切事件
+                }
+                
+            }
+            mark = true;//标志 鼠标按下
+        }
+        private void Image_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            mousePoint = e.GetPosition(image);//右键时获得鼠标坐标
         }
         private void Image_MouseMove(object sender, MouseEventArgs e)
         {
@@ -517,36 +547,31 @@ namespace CGedit
                     ellipse1.Height = xs[3];
                     ellipse1.Margin = new Thickness(xs[0], xs[1], 0, 0);//这里是视觉上出现画圆的效果
                 }
-                if (tbtn == DrawLineBtn && tbtn.IsChecked == true)
-                {
-                }
                 if (brush.IsChecked == true||braser.IsChecked==true)
                 {
-                    
                     drawPointCollection.Add(position);
                     myPointCollection.Add(position2);
                     line.Points = myPointCollection;
-
                 }
             }
         }
         private void Image_MouseUp(object sender, MouseButtonEventArgs e)
         {
             mark = false;
-            rectangle1.Visibility = Visibility.Hidden;
+            //rectangle1.Visibility = Visibility.Hidden;
         }
-        private void Window_MouseUp(object sender, MouseButtonEventArgs e)
+        private void Window_MouseLeftUp(object sender, MouseButtonEventArgs e)
         {
             mark = false;
+            Point position = e.GetPosition(image);
+            double px = position.X;
+            double py = position.Y;
+            double[] xs = makeRectangle(x, y, px, py);
             //椭圆
             if (tbtn == DrawEllipseBtn && tbtn.IsChecked == true)  //如果是画椭圆
             {
                 //当鼠标抬起时 获取视觉上画圆得出来的坐标和大小 正式使用geometry画圆
                 ellipse1.Visibility = Visibility.Hidden;
-                Point position = e.GetPosition(image);
-                double px = position.X;
-                double py = position.Y;
-                double[] xs = makeRectangle(x, y, px, py);
                 Point p = new Point(xs[0] + xs[2] / 2, xs[1] + xs[3] / 2);
                 //拿到中心点 为画圆做准备
                 EllipseGeometry ellipseGeometry = new EllipseGeometry();
@@ -557,46 +582,19 @@ namespace CGedit
                 g.Geometry = ellipseGeometry;      //设定图形
                 g.Pen = new Pen(new SolidColorBrush(brushColor), 2); ;   //设定笔触
                 //把这个加入复合组中
-                drawingGroup1.Children.Add(g);
-                //在控件中显示
-                DrawingImage drawImage = new DrawingImage(drawingGroup1);
-                image.Source = drawImage;
+                Drawimage(g);
+                
             }
-
             //选区
             if (tbtn == DrawRectBtn && tbtn.IsChecked == true)
             {
-
                 //rectangle1.Visibility = Visibility.Hidden;
-                Point position = e.GetPosition(image);
-                double px = position.X;
-                double py = position.Y;
                 rect = makeRectangle(x, y, px, py); //得到了矩形框
                 MessageBox.Show(rect[0].ToString() + " " + rect[1].ToString() + " " + rect[2].ToString() + " " + rect[3].ToString());
                 isSelect = true; //进入选区模式
                 tbtn.IsChecked = false;
 
             }
-            //如果是画线
-            if (tbtn == DrawLineBtn && tbtn.IsChecked == true) 
-            {
-                //line.Visibility = Visibility.Hidden;
-                Point position = e.GetPosition(image);
-                double px = position.X;
-                double py = position.Y;
-                LineGeometry lineGeometry = new LineGeometry();
-                lineGeometry.EndPoint = new Point(px, py);
-                lineGeometry.StartPoint = new Point(x, y);
-                GeometryDrawing g = new GeometryDrawing();
-                g.Geometry = lineGeometry;
-                g.Pen = new Pen(new SolidColorBrush(brushColor), 2);
-                drawingGroup1.Children.Add(g);
-                //在控件中显示
-                DrawingImage drawImage = new DrawingImage(drawingGroup1);
-                image.Source = drawImage;
-            }
-
-
             //如果是画笔或者橡皮擦
             if (brush.IsChecked==true||braser.IsChecked ==true)
             {
@@ -617,20 +615,59 @@ namespace CGedit
 
                 switch (myBrushBraserShape)
                 {
+                    //绘制的时候判断一下在不在选区内
                     case BrushBraserShape.line:
                     {
                         for (int i = 0; i < drawPointCollection.Count - 1; i++)
                         {
-                            LineGeometry l = new LineGeometry(drawPointCollection[i],drawPointCollection[i+1]);
+                            LineGeometry l = new LineGeometry();
+                            if (isSelect) //选取状态下
+                            {
+                                if (PointInRect(drawPointCollection[i],new Rect(rect[0],rect[1],rect[2],rect[3])))//判断点在不在选区范围内
+                                {
+                                    l.StartPoint = drawPointCollection[i];
+                                    l.EndPoint = drawPointCollection[i + 1];
+                                }
+                                else
+                                {
+                                    continue;
+                                }
+                            }
+                            else
+                            {
+                                l.StartPoint = drawPointCollection[i];
+                                l.EndPoint = drawPointCollection[i + 1];
+
+                             }
                             lineGroup.Children.Add(l);//存入组
-                        }
+                            }
                     }
                         break;
                     case BrushBraserShape.circle:
                     {
                         for (int i = 0; i < drawPointCollection.Count - 1; i++)
                         {
-                            EllipseGeometry el = new EllipseGeometry(drawPointCollection[i],pen.Thickness/2,pen.Thickness/2);
+                            EllipseGeometry el = new EllipseGeometry();
+                            if (isSelect)
+                            {
+                                if (PointInRect(drawPointCollection[i], new Rect(rect[0], rect[1], rect[2], rect[3])))//判断点在不在选区范围内
+                                {
+                                    el.Center = drawPointCollection[i];
+                                    el.RadiusX = pen.Thickness / 2;
+                                    el.RadiusY = pen.Thickness / 2;
+                                }
+                                else
+                                {
+                                    continue;
+                                }
+                            }
+                            else
+                            {
+                                el.Center = drawPointCollection[i];
+                                el.RadiusX = pen.Thickness / 2;
+                                el.RadiusY = pen.Thickness / 2;
+                            }
+                               
                             lineGroup.Children.Add(el);
                         }
                     }
@@ -639,8 +676,25 @@ namespace CGedit
                     {
                         for (int i = 0; i < drawPointCollection.Count - 1; i++)
                         {
-                            RectangleGeometry el = new RectangleGeometry(new Rect(drawPointCollection[i],
-                                new Size(pen.Thickness / 2, pen.Thickness / 2)));
+                            RectangleGeometry el = new RectangleGeometry();
+                            if (isSelect)
+                            {
+                                if (PointInRect(drawPointCollection[i], new Rect(rect[0], rect[1], rect[2], rect[3])))
+                                {
+                                    el.Rect = new Rect(drawPointCollection[i],
+                                        new Size(pen.Thickness / 2, pen.Thickness / 2));
+                                }
+                                else
+                                {
+                                    continue;
+                                }
+                            }
+                            else
+                            {
+                                el.Rect = new Rect(drawPointCollection[i],
+                                    new Size(pen.Thickness / 2, pen.Thickness / 2));
+                             }
+                           
                             lineGroup.Children.Add(el);
                         }
                     }
@@ -651,13 +705,18 @@ namespace CGedit
                 g.Geometry = lineGroup;
                 g.Pen = pen;
                 g.Brush = pen.Brush;
-                drawingGroup1.Children.Add(g);
-                //在控件中显示
-                DrawingImage drawImage = new DrawingImage(drawingGroup1);
-                image.Source = drawImage;
+                Drawimage(g);
+                
             }
-          
-
+            //移动选区
+            if (isSelect && SelectMoveBtn.IsChecked == true) // 在选区可移动状态下 这里是松开鼠标 粘贴
+            {
+                Point offset = Offset(new Point(x, y), position);//算出偏移
+                //矩形选框位置加上偏移量
+                rect[0] += offset.X;
+                rect[1] += offset.Y;
+                stickImage(new Rect(rect[0], rect[1], rect[2], rect[3]));
+            }
         }
         /// <summary>
         /// 修改画笔和橡皮擦形状
@@ -675,17 +734,23 @@ namespace CGedit
         }
         private void Window_MouseMove(object sender, MouseEventArgs e)
         {
-            if (brush.IsChecked==true||braser.IsChecked==true)
-            {
-                tbtn.IsChecked = false;
-            }
-
             if (rectangle1.Visibility == Visibility.Hidden)
             {
                 isSelect = false;
             }
-
-            mousePoint = e.GetPosition(image);
+            //按钮状态同步
+            if (!isSelect)
+            {
+                SelectMoveBtn.IsChecked = false;
+            }
+            SelectMoveBtn.IsEnabled = isSelect;
+            deleteSelect.IsEnabled = isSelect;
+            cancelSelect.IsEnabled = isSelect;
+            copy.IsEnabled = isSelect;
+            cut.IsEnabled = isSelect;
+            copy1.IsEnabled = isSelect;
+            cut1.IsEnabled = isSelect;
+            //mousePoint = e.GetPosition(image);
         }
     }
 }

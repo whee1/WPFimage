@@ -1,11 +1,12 @@
-﻿<Window x:Class="CGedit.MainWindow"
+﻿<Window
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CGedit"
+        xmlns:System="clr-namespace:System;assembly=mscorlib" x:Class="CGedit.MainWindow"
         mc:Ignorable="d"
-        Title="MainWindow" Height="700" Width="1000" MouseDown="Window_MouseDown" MouseUp="Window_MouseUp" MouseMove="Window_MouseMove" Activated="Window_Activated">
+        Title="MainWindow" Height="700" Width="1000" MouseDown="Window_MouseDown"  MouseMove="Window_MouseMove" Activated="Window_Activated" MouseLeftButtonUp="Window_MouseLeftUp">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
@@ -19,43 +20,60 @@
                 <MenuItem Header="保存" HorizontalAlignment="Left" Height="24" Width="144" Click="SaveBtn_Click"/>
             </MenuItem>
             <MenuItem Header="编辑" Height="26" Width="73">
-                <MenuItem Name="copy" Header="复制" HorizontalAlignment="Left" Height="29" Width="144" Click="Copy_Click"/>
-                <MenuItem Name="cut" Header="剪切" HorizontalAlignment="Left" Height="21" Width="144"/>
-                <MenuItem Name="stick" Header="粘贴" HorizontalAlignment="Left" Height="24" Width="144" Click="Stick_Click"/>
+                <MenuItem x:Name="copy" Header="复制" HorizontalAlignment="Left" Height="29" Width="144" Click="Copy_Click"/>
+                <MenuItem x:Name="cut" Header="剪切" HorizontalAlignment="Left" Height="21" Width="144" Click="Cut_Click"/>
+                <MenuItem x:Name="stick" Header="粘贴" HorizontalAlignment="Left" Height="24" Width="144" Click="Stick_Click"/>
             </MenuItem>
         </Menu>
         <Grid Margin="0,50,0,0.4" HorizontalAlignment="Left" Width="119">
 
             <StackPanel RenderTransformOrigin="0.434,0.544" Margin="0,1,0,-2">
 
+                <ToggleButton Content="移动" x:Name="SelectMoveBtn" Height="19" Margin="10,0,74.2,0" Background="{x:Null}" Foreground="Black" BorderBrush="{x:Null}"/>
+                <ToolBarPanel Height="101" Margin="0,0,0.2,0">
+                    <ToolBar  Height="33" Margin="0,0,0.2,0" Background="{x:Null}" Foreground="{x:Null}">
+                        <ToggleButton Content="画笔" Height="24" x:Name="brush" Checked="DrawBtn_Checked" Width="35" Margin="0,4,0,-0.8" BorderBrush="{x:Null}"/>
+                        <Button x:Name="color" Content="" Background="#FFFF0202" Click="Color_Click" RenderTransformOrigin="0.159,0.609" BorderBrush="#FFC0ACAC" Width="26" Height="22" Margin="0,5,0,0.2">
+                        </Button>
+                        <Slider x:Name="brushSlider" Maximum="10" Minimum="5" Margin="0,0,0,0" Width="119"/>
 
-                <RadioButton Content="画笔" Margin="0,0,0,0" Height="20" x:Name="brush"/>
-                <Button x:Name="color" Content="" Background="#FFFF0202" Click="Color_Click" Margin="18,0,71.2,0" RenderTransformOrigin="0.159,0.609" BorderBrush="#FFC0ACAC"/>
-                <Slider x:Name="brushSlider" Height="29" Maximum="10" Minimum="5"/>
-                <RadioButton Content="橡皮擦" Margin="0,0,0,0" Height="20" x:Name="braser"/>
-                <Slider x:Name="braserSlider" Height="42" Maximum="10" Minimum="5"/>
+                    </ToolBar>
+                    <ToolBar Height="31" Margin="0,0,0.2,0" Background="{x:Null}">
+                        <ToggleButton Content="橡皮" Height="23" x:Name="braser" Checked="DrawBtn_Checked" Width="35" Margin="0,0,0,2.6" BorderBrush="{x:Null}"/>
+                        <Slider x:Name="braserSlider" Maximum="10" Minimum="5" Width="97"/>
+                    </ToolBar>
+                    <ToolBar Height="35" Background="{x:Null}" Margin="0,0,0.2,0">
+
+                        <ToggleButton x:Name="RectBtn" Content="□" Width="35" Height="37" ToolTip="方形画笔" IsChecked="False" Margin="0,-4,0,-2.6" Checked="ShapeBtn_Checked"/>
+                        <ToggleButton x:Name="EllipseBtn" Content="○" Width="35" Height="35" ToolTip="圆形画笔" IsChecked="False"  Margin="0,-2,0,-2.6" Checked="ShapeBtn_Checked"/>
+                        <ToggleButton x:Name="LineBtn" Content="—" Width="33" Height="38" ToolTip="线条型画笔" IsChecked="False"  Margin="0,0,0,-1.2" Checked="ShapeBtn_Checked"/>
+                    </ToolBar>
+                </ToolBarPanel>
                 <ToolBar Height="42" Background="{x:Null}">
 
-                    <ToggleButton x:Name="RectBtn" Content="□" Width="31" Height="37" ToolTip="选区" IsChecked="False" Margin="0,-1,0,0.8" Checked="ShapeBtn_Checked"/>
-                    <ToggleButton x:Name="EllipseBtn" Content="○" Width="46" Height="37" ToolTip="画椭圆" IsChecked="False"  Margin="0,0,0,-0.2" Checked="ShapeBtn_Checked"/>
-                    <ToggleButton x:Name="LineBtn" Content="—" Width="33" Height="38" ToolTip="画线" IsChecked="False"  Margin="0,0,0,-1.2" Checked="ShapeBtn_Checked"/>
+                    <ToggleButton x:Name="DrawRectBtn" Content="选区" Width="35" Height="20" ToolTip="选区" IsChecked="False" Checked="DrawBtn_Checked" Margin="0,8,0,8.8"/>
+                    <ToggleButton x:Name="DrawEllipseBtn" Content="E" Width="35" Height="20" ToolTip="画椭圆" IsChecked="False" Checked="DrawBtn_Checked" Margin="0,8,0,8.8"/>
                 </ToolBar>
-                <ToolBar Height="42" Background="{x:Null}">
-
-                    <ToggleButton x:Name="DrawRectBtn" Content="选区" Width="37" Height="20" ToolTip="选区" IsChecked="False" Checked="DrawBtn_Checked" Margin="0,8,0,8.8"/>
-                    <ToggleButton x:Name="DrawEllipseBtn" Content="E" Width="20" Height="20" ToolTip="画椭圆" IsChecked="False" Checked="DrawBtn_Checked"/>
-                    <ToggleButton x:Name="DrawLineBtn" Content="L" Width="20" Height="20" ToolTip="画线" IsChecked="False" Checked="DrawBtn_Checked"/>
-                </ToolBar>
-                <Button x:Name="ruihuaBtn" Content="锐化" Height="28" Click="RuihuaBtn_Click" Background="{x:Null}" BorderBrush="{x:Null}"/>
-                <Button x:Name="mohuBtn" Content="模糊" Height="28" Click="MohuBtn_Click" Background="{x:Null}" BorderBrush="{x:Null}"/>
+                <Button x:Name="ruihuaBtn" Content="锐化" Height="28" Click="RuihuaBtn_Click" Background="{x:Null}" BorderBrush="{x:Null}" Margin="10,0,74.2,0"/>
+                <Button x:Name="mohuBtn" Content="模糊" Height="28" Click="MohuBtn_Click" Background="{x:Null}" BorderBrush="{x:Null}" Margin="10,0,74.2,0"/>
             </StackPanel>
         </Grid>
         <Grid x:Name="grid1" Margin="125,48,6.6,8.4" Background="#FF909090">
-            <Image x:Name="image" MouseLeftButtonDown="Image_MouseLeftButtonDown" MouseMove="Image_MouseMove" MouseUp="Image_MouseUp" Stretch="None" Height="614" VerticalAlignment="Top" HorizontalAlignment="Left" Width="853" MouseWheel="Image_MouseWheel">
+            <Image x:Name="image" MouseLeftButtonDown="Image_MouseLeftButtonDown" MouseMove="Image_MouseMove" MouseUp="Image_MouseUp" Stretch="None" Height="614" VerticalAlignment="Top" HorizontalAlignment="Left" Width="853" MouseWheel="Image_MouseWheel" MouseRightButtonDown="Image_MouseRightButtonDown">
                 <Image.RenderTransform>
                     <ScaleTransform x:Name="scale"/>
                 </Image.RenderTransform>
+                <Image.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem x:Name="copy1" Header="复制" HorizontalAlignment="Left" Height="29" Width="144" Click="Copy_Click"/>
+                        <MenuItem x:Name="cut1" Header="剪切" HorizontalAlignment="Left" Height="21" Width="144" Click="Cut_Click"/>
+                        <MenuItem x:Name="rightStick" Header="粘贴" HorizontalAlignment="Left" Height="24" Width="144" Click="Stick_Click"/>
+                        <MenuItem x:Name="cancelSelect" Header="取消选区" HorizontalAlignment="Left" Height="24" Width="144" Click="CancelSelect_Click"/>
+                        <MenuItem x:Name="deleteSelect" Header="删除选区" HorizontalAlignment="Left" Height="24" Width="144" Click="DeleteSelect_Clic"/>
+                    </ContextMenu>
+                </Image.ContextMenu>
             </Image>
+
             <Ellipse x:Name="ellipse1"  Visibility="Hidden" Stroke="Black" HorizontalAlignment="Left" Height="100" Margin="66,73,0,0" VerticalAlignment="Top" Width="100"/>
             <Rectangle  x:Name="rectangle1"  Visibility="Hidden" Stroke="Black" HorizontalAlignment="Left" Height="100" Margin="66,73,0,0" VerticalAlignment="Top" Width="100"/>
             <Polyline x:Name="line" Stroke="Black" StrokeThickness="2"/>

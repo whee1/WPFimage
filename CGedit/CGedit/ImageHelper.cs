@@ -262,5 +262,7 @@ namespace CGedit
             g.Dispose();
             return bmp;
         }
+        
+
     }
 }
